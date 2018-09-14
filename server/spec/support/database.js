@@ -14,6 +14,7 @@ exports.setup = async function() {
   await enableForeignKeys();
   await populatePatients();
   await populateAppointments();
+  await populateBlockbookings();
 };
 
 async function enableForeignKeys() {
@@ -75,3 +76,35 @@ const APPOINTMENTS = [
   { id: 2, patientId: 2, startTime: '2018-04-06T20:00:00Z', duration: 30 },
   { id: 3, patientId: 2, startTime: '2017-11-30T13:00:00Z', duration: 45 }
 ];
+
+const BLOCKBOOKINGS = [
+//  { id: 1, description: 'description1', startTime: '2018-09-13T16:00:00Z', duration: 45,  recurrence: '', dateEnd: '2018-10-06'},
+//  { id: 2, description: 'description2', startTime: '2018-04-06T20:00:00Z', duration: 30,  recurrence: '24', dateEnd: '2018-10-06'},
+  { id: 3, description: 'description3', startTime: '2018-09-13T17:00:00Z', duration: 45,  recurrence: '25', dateEnd: '2018-10-06'}
+];
+
+async function populateBlockbookings() {
+  await global.db.run(`
+    CREATE TABLE blockbookings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      description TEXT,
+      start_time TEXT,
+      duration INTEGER,
+      recurrence TEXT,
+      dateEnd TEXT
+    )`);
+  for(const blockbooking of BLOCKBOOKINGS) {
+    const params = {
+      $id: blockbooking.id,
+      $description: blockbooking.description,
+      $startTime: blockbooking.startTime,
+      $duration: blockbooking.duration,
+      $recurrence: blockbooking.recurrence,
+      $dateEnd: blockbooking.dateEnd
+    };
+    await global.db.run(`
+      INSERT INTO blockbookings (id, description, start_time, duration, recurrence, dateEnd)
+      VALUES ($id, $description, $startTime, $duration, $recurrence, $dateEnd)
+    `, params);
+  }
+}
