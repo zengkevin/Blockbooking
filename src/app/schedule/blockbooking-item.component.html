@@ -1,0 +1,16 @@
+<div class="card container">
+  <div class="row align-items-baseline">
+    <div [routerLink]="['/blockbookings', blockbooking.id, 'edit']" class="col-3 col-md-5 time">
+      {{formatTime()}}
+    </div>
+    <div [routerLink]="['/blockbookings', blockbooking.id, 'edit']" class="col-8 col-md-6 name">
+      <div>{{blockbooking.description}}</div>
+    </div>
+    <div [routerLink]="['/blockbookings', blockbooking.id, 'edit']" class="col-8 col-md-6 name">
+      <div>{{recurrenceFormatTime()}} To {{blockbooking.dateEnd.substring(0, 10)}}</div>
+    </div>
+    <div class="col-1 float-right">
+      <fa-icon (click)="delete.emit(blockbooking)" [icon]="deleteIcon"></fa-icon>
+    </div>
+  </div>
+</div>

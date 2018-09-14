@@ -17,4 +17,20 @@
        <drp-schedule-item [appointment]=appointment (delete)="deleteAppointment($event)"></drp-schedule-item>
     </div>
   </div>
+  <hr color='white'>
+  <div class="row justify-content-center">
+    <h4>
+      <span class="title">Block Bookings - {{date?.format('LL')}}</span>
+    </h4>
+  </div>
+  <div class="row justify-content-center">
+    <div *ngIf="!blockbookings?.length" class="col-12 col-md-9">
+      There are no blockbookings.
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <div *ngFor="let blockbooking of blockbookings" class="col-12 col-md-9">
+       <drp-blockbooking-item [blockbooking]=blockbooking (delete)="deleteBlockbooking($event)"></drp-blockbooking-item>
+    </div>
+  </div>
 </div>

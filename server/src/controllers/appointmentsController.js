@@ -5,6 +5,7 @@
 const moment = require('moment-timezone');
 const appointments = require('../models/appointments');
 const { forCreate, forUpdate } = require('./appointmentRequest');
+const blockbookings = require('../models/blockbookings');
 
 exports.appointments_list = async function (_, res) {
   const allAppointments = await appointments.getAll();
@@ -40,21 +41,25 @@ exports.appointments_showByDate = async function (req, res) {
 };
 
 exports.appointments_create = async function (req, res) {
+  let allBlockBookings = await blockbookings.getAll();
+
   try {
-    const request = forCreate(req.body);
+    const request = forCreate(req.body, allBlockBookings);
     let appointment = await appointments.create(request.appointment);
     return res.status(201).json(mapToHttp(appointment));
   } catch (err) {
-    return res.status(400).send();
+    return res.status(400).send(err.messages);
   }
 };
 
 exports.appointments_update = async function (req, res) {
   let request = null;
+  let allBlockBookings = await blockbookings.getAll();
+
   try {
-    request = forUpdate(req.params.id, req.body);
+    request = forUpdate(req.params.id, req.body, allBlockBookings);
   } catch (err) {
-    return res.status(400).send();
+    return res.status(400).send(err.messages);
   }
 
   try {

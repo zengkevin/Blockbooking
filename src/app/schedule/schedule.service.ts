@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Appointment } from './appointment.model';
 import { MOMENT_TOKEN } from '../shared/moment.service';
+import { Blockbooking } from '../blockbooking/blockbooking.model';
 
 @Injectable()
 export class ScheduleService {
@@ -21,4 +22,15 @@ export class ScheduleService {
     return this.http.delete<null>('/api/appointments/' + appointment.id)
       .toPromise<null>();
   }
+
+  getBlockbooking(date: string) {
+    return this.http.get('/api/blockbookings/' + date + '?tz=' + this.tz)
+      .pipe(map(response => <Blockbooking[]>response['blockbookings']));
+  }
+
+  remove(blockbooking: Blockbooking) {
+    return this.http.delete<null>('/api/blockbookings/' + blockbooking.id)
+      .toPromise<null>();
+  }
+
 }

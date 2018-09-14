@@ -5,14 +5,16 @@ const moment = require('moment');
  * to create or update an appointment.
  */
 class AppointmentRequest {
-  constructor(id, body) {
+  constructor(id, body, allBlockBookings) {
+    this._allBlockBookings = allBlockBookings;
+
     let messages = this.getValidationMessages(id, body);
     if (messages.length) {
       const error = new Error('Request contains one or more validation errors');
       error.messages = messages;
       throw error;
     }
- 
+
     this._appointment = {};
     if (id) {
       this._appointment.id = id;
@@ -24,6 +26,59 @@ class AppointmentRequest {
 
   get appointment() {
     return this._appointment;
+  }
+
+  IsOverlapped(blockbooking, startTime, duration) {
+    let startTimeMoment = moment(startTime, 'YYYY-MM-DDTHH:mm:ss\\Z')
+    let startTimeToCheck = startTimeMoment.valueOf();
+    let endTimeToCheck = startTimeToCheck  + duration * 1000;
+    let dayOfWeek = startTimeMoment.day();
+
+    let blockbookingStartTimeMoment = moment(blockbooking.startTime, 'YYYY-MM-DDTHH:mm:ss\\Z');
+    let recurrenceStartMoment = moment([
+      startTimeMoment.year(),
+      startTimeMoment.month(),
+      startTimeMoment.date(),
+      blockbookingStartTimeMoment.hour(),
+      blockbookingStartTimeMoment.minutes()
+    ]);
+    let recurrenceStartTime = recurrenceStartMoment.valueOf();
+    let recurrenceEndTime = recurrenceStartTime + blockbooking.duration * 1000;
+    if(recurrenceStartTime>=startTimeToCheck && recurrenceStartTime<=endTimeToCheck)
+      return true;
+    if(recurrenceEndTime>=startTimeToCheck && recurrenceEndTime<=endTimeToCheck)
+      return true;
+
+    if(blockbooking.recurrence.length) {
+      if(blockbooking.recurrence.indexOf(dayOfWeek)>=0) {
+        let endDateTime = moment(blockbooking.dateEnd, 'YYYY-MM-DDTHH:mm:ss\\Z').valueOf();
+        let weeklyTime = 7 * 24 * 3600 * 1000;
+        recurrenceStartTime += weeklyTime;
+        while (recurrenceStartTime <= endDateTime) {
+          recurrenceEndTime += weeklyTime;
+          if(recurrenceStartTime>=startTimeToCheck && recurrenceStartTime<=endTimeToCheck)
+            return true;
+          if(recurrenceEndTime>=startTimeToCheck && recurrenceEndTime<=endTimeToCheck)
+            return true;
+
+            recurrenceStartTime += weeklyTime;
+        }
+      }
+    } 
+
+    return false;
+  }
+
+  IsTimeBlockBooking(startTime, duration) {
+    if(this._allBlockBookings) {
+      for(let index=0; index < this._allBlockBookings.length; index++) {
+        if(this.IsOverlapped(this._allBlockBookings[index], startTime, duration)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   getValidationMessages(id, body) {
@@ -61,6 +116,10 @@ class AppointmentRequest {
       }
     }
 
+    if(errors.length==0 && this.IsTimeBlockBooking(body.startTime, body.duration)) {
+      errors.push(`appointment startTime '${body.startTime}' is in a peroid of blockbooking time!`);
+    }
+
     return errors;
   }
 }
@@ -71,8 +130,8 @@ class AppointmentRequest {
  * @param {Object} body - An HTTP request body
  * @throws if the request is not correctly formed
  */
-function forCreate(body) {
-  return new AppointmentRequest(null, body);
+function forCreate(body, allBlockBookings=null) {
+  return new AppointmentRequest(null, body, allBlockBookings);
 }
 
 /**
@@ -82,8 +141,8 @@ function forCreate(body) {
  * @param {Object} body - An HTTP request body
  * @throws if the request is not correctly formed
  */
-function forUpdate(id, body) {
-  return new AppointmentRequest(id, body);
+function forUpdate(id, body, allBlockBookings=null) {
+  return new AppointmentRequest(id, body, allBlockBookings);
 }
 
 module.exports = {

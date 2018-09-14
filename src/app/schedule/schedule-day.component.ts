@@ -3,6 +3,7 @@ import { ScheduleService } from './schedule.service';
 import { Appointment } from './appointment.model';
 import { MOMENT_TOKEN } from '../shared/moment.service';
 import { ActivatedRoute } from '@angular/router';
+import { Blockbooking } from '../blockbooking/blockbooking.model';
 
 @Component({
   selector: 'drp-schedule-day',
@@ -10,6 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ScheduleDayComponent implements OnInit {
   appointments: Appointment[];
+  blockbookings: Blockbooking[];
   date: any; // Moment
 
   constructor(
@@ -37,10 +39,18 @@ export class ScheduleDayComponent implements OnInit {
     this.scheduleService.delete(appointment).then(() => this.updateSchedule(this.date));
   }
 
+  deleteBlockbooking(blockbooking) {
+    this.scheduleService.remove(blockbooking).then(() => this.updateSchedule(this.date));
+  }
+
   private updateSchedule(date) {
     this.scheduleService.getSchedule(date.format('YYYY-MM-DD')).subscribe(appointments => {
       this.date = date;
       this.appointments = appointments;
+    });
+
+    this.scheduleService.getBlockbooking(date.format('YYYY-MM-DD')).subscribe(blockbookings => {
+      this.blockbookings = blockbookings;
     });
   }
 }

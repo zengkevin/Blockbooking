@@ -20,7 +20,8 @@ import {
   ScheduleDayComponent,
   ScheduleNavComponent,
   ScheduleService,
-  ScheduleItemComponent
+  ScheduleItemComponent,
+  BlockbookingItemComponent
 } from './schedule';
 import {
   EditAppointmentComponent,
@@ -28,6 +29,11 @@ import {
   AppointmentResolver
 } from './appointment';
 import { MOMENT_TOKEN } from './shared/moment.service';
+import {
+  BlockbookingComponent,
+  BlockbookingService,
+  BlockbookingResolver
+} from './blockbooking';
 
 const moment = window['moment'];
 
@@ -42,7 +48,9 @@ const moment = window['moment'];
     ScheduleDayComponent,
     ScheduleNavComponent,
     ScheduleItemComponent,
-    EditAppointmentComponent
+    EditAppointmentComponent,
+    BlockbookingComponent,
+    BlockbookingItemComponent
   ],
   imports: [
     BrowserModule,
@@ -57,7 +65,9 @@ const moment = window['moment'];
     ScheduleService,
     AppointmentService,
     AppointmentResolver,
-    { provide: MOMENT_TOKEN, useValue: moment }
+    { provide: MOMENT_TOKEN, useValue: moment },
+    BlockbookingService,
+    BlockbookingResolver
   ],
   bootstrap: [AppComponent]
 })
